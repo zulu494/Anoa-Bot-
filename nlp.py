@@ -10,8 +10,8 @@ label = { 0: 'Aman', 1: 'Penipuan', 2: 'Promo' }
 
 def get_label(dataset, message):
     data_train, data_test, label_train, label_test = train_test_split(
-        dataset.data,
-        dataset.label,
+        dataset[1],
+        dataset[0],
         test_size=0.2,
         random_state=40
     )

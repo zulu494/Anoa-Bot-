@@ -17,6 +17,8 @@ class Dataset():
                 self.label.append(message[0])
                 self.data.append(self.data_cleaning(message[1]))
 
+        return (self.label, self.data)
+
     def data_cleaning(self, message, custom_stopword = None):
         after_stem = stemmer.stem(message)
         remover = StopWordRemover(ArrayDictionary(custom_stopword if custom_stopword else stop_factory))

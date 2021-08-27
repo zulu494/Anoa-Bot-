@@ -10,7 +10,7 @@ from yowsup.layers.protocol_presence.protocolentities import PresenceProtocolEnt
 from yowsup.common.tools import Jid
 from session import Session
 from dataset import Dataset
-import time, random, re, nlp, berita
+import time, random, re, nlp
 
 data = Dataset().extract('')
 session = Session()
@@ -28,29 +28,10 @@ class MainLayer(YowInterfaceLayer):
     def welcomeMessage(self, namemitt, recipient):
         petunjuk = "Untuk menggunakan bot, ketik salah satu angka dibawah ini:\n\n"\
             "1. Cek SMS Penipuan\n"\
-            "2. Cek Berita Hoax\n"\
             "0. Kembali ke Menu"
 
         self.toLower(TextMessageProtocolEntity("Halo, {} ! Bot Anti Hoax Disini 👋".format(namemitt), to=recipient))
         self.toLower(TextMessageProtocolEntity(petunjuk, to=recipient))
-    
-    def cariBerita(self, message):
-        template = ""
-        berita = berita.get_berita(message)
-        berita_hits = berita['hits']
-
-        if berita['found'] >= 1:
-            ambil_berita = berita_hits[0]
-            konten = ambil_berita['document']
-            link_berita = konten['link']
-            title = konten['title']
-            template += "Hasil validasi berita dari kami:\n"
-                "{}\n"
-                "Link Artikel: {}\n".format(title, link_berita)
-        else:
-            template += "Mohon maaf, kami tidak dapat menemukan artikel yang anda cari."
-
-        return template
 
     def onTextMessage(self, messageProtocolEntity):
         self.toLower(messageProtocolEntity.ack())
@@ -72,24 +53,14 @@ class MainLayer(YowInterfaceLayer):
         recipient = messageProtocolEntity.getFrom()
         current_session = session.get(recipient)
 
-        if current_session in [1, 2] and message == '0':
-            session.set(receipt)
-            self.welcomeMessage(namemitt, receipt)
-        elif current_session == 0 and message in ['1', '2']:
+        if current_session == 0 and message == '1':
             session.set(recipient, int(message))
-            template = ""
-            if int(message) == 1:
-                template += "📋 Salin dan tempel pesan disini untuk pengecekan."
-            else:
-                template += "🔍 Masukkan kata kunci berita yang ingin divalidasi. Misalnya: *vaksin babi*."
-                
-            template += "\n\nKetik *0* untuk kembali ke menu."
+            template = "📋 Salin dan tempel pesan disini untuk pengecekan."\
+                "\n\nKetik *0* untuk kembali ke menu."
             self.toLower(TextMessageProtocolEntity(template, to=recipient))
         else:
-            if current_session == 0:
-                self.welcomeMessage(namemitt, recipient)
-            elif current_session == 1:
-                label = nlp.get_label(message)
+            if current_session == 1:
+                label = nlp.get_label(data, message)
                 self.toLower(TextMessageProtocolEntity("Hasil analisis sistem untuk pesan tersebut adalah *{}*.".format(label), to=recipient))
 
                 time.sleep(random.randrange(2,4))
@@ -101,9 +72,9 @@ class MainLayer(YowInterfaceLayer):
                     "Selalu waspada dan bijak dalam menggunakan internet. Jika ada pesan atau informasi yang mencurigakan harap lapor segera ke akun sosial media resmi terkait.\n\n"\
                     "Terima kasih."
                 self.toLower(TextMessageProtocolEntity(himbauan, to=recipient))
-            elif current_session == 2:
-                berita = self.cariBerita(message)
-                self.toLower(TextMessageProtocolEntity(berita, to=recipient))
+            else:
+                session.set(recipient)
+                self.welcomeMessage(namemitt, recipient)
             
         time.sleep(random.randrange(4,5))
         self.toLower(UnavailablePresenceProtocolEntity())
