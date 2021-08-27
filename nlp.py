@@ -25,8 +25,10 @@ def get_label(dataset, message):
     pipe.fit(data_train, label_train)
     result = pipe.predict([message])
 
+    # !!! for data mining purpose !!!
     f = open("collect.txt", "a")
     f.write(result[0] + ',' + message + "\n")
     f.close()
+    # !!! for data mining purpose !!!
 
     return label[int(result[0])]

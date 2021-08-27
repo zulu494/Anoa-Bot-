@@ -2,7 +2,7 @@
 NLP Hoax Detection
 
 ## Project Description 
-ini merupakan sebuah project pembangunan sebuah bot yang berbasis pada whatsapp server dengan mengguanakan NLP(Natural Language Processing) untuk mengklasifikasikan sebuah informasi dalam bentuk teks maupun link kedalam bentuk pesan informasi hoaks atau bukan.
+ini merupakan sebuah project pembangunan sebuah bot yang berbasis pada whatsapp server dengan mengguanakan NLP(Natural Language Processing) untuk mengklasifikasikan sebuah informasi dalam bentuk teks kedalam bentuk pesan informasi hoaks atau bukan.
 
 ## Team Members
 - Diva Ramadhan
