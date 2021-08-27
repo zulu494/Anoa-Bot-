@@ -16,6 +16,24 @@ data = Dataset().extract('')
 session = Session()
 
 class MainLayer(YowInterfaceLayer):
+    def onEvent(self, layerEvent):
+        print("WhatsApp-Plugin : EVENT " + layerEvent.getName())
+        if layerEvent.getName() == YowNetworkLayer.EVENT_STATE_DISCONNECTED:
+            print("WhatsApp-Plugin : Disconnected reason: %s" % layerEvent.getArg("reason"))
+            if layerEvent.getArg("reason") == 'Connection Closed':
+                time.sleep(20)
+                print("WhatsApp-Plugin : Issueing EVENT_STATE_CONNECT")
+                self.getStack().broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_CONNECT))
+            elif layerEvent.getArg("reason") == 'Ping Timeout':
+                time.sleep(20)
+                print("WhatsApp-Plugin : Issueing EVENT_STATE_DISCONNECT")
+                self.getStack().broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_DISCONNECT)) 
+                time.sleep(20)
+                print("WhatsApp-Plugin : Issueing EVENT_STATE_CONNECT")
+                self.getStack().broadcastEvent(YowLayerEvent(YowNetworkLayer.EVENT_STATE_CONNECT))
+        elif layerEvent.getName() == YowNetworkLayer.EVENT_STATE_CONNECTED:
+            print("WhatsApp-Plugin : Connected")
+
     @ProtocolEntityCallback("message")
     def onMessage(self, messageProtocolEntity):
         if messageProtocolEntity.getType() == 'text':
@@ -59,7 +77,10 @@ class MainLayer(YowInterfaceLayer):
                 "\n\nKetik *0* untuk kembali ke menu."
             self.toLower(TextMessageProtocolEntity(template, to=recipient))
         else:
-            if current_session == 1:
+            if message == '0':
+                session.set(recipient)
+                self.welcomeMessage(namemitt, recipient)
+            else:
                 label = nlp.get_label(data, message)
                 self.toLower(TextMessageProtocolEntity("Hasil analisis sistem untuk pesan tersebut adalah *{}*.".format(label), to=recipient))
 
@@ -70,11 +91,10 @@ class MainLayer(YowInterfaceLayer):
                     "- Selalu cek keaslian website tersebut dengan melakukan validasi.\n"\
                     "- Jangan mudah tergiur penawaran dari SMS.\n\n"\
                     "Selalu waspada dan bijak dalam menggunakan internet. Jika ada pesan atau informasi yang mencurigakan harap lapor segera ke akun sosial media resmi terkait.\n\n"\
-                    "Terima kasih."
+                    "Terima kasih.\n"\
+                    "---------------\n"\
+                    "Ketik *0* untuk kembali ke menu."
                 self.toLower(TextMessageProtocolEntity(himbauan, to=recipient))
-            else:
-                session.set(recipient)
-                self.welcomeMessage(namemitt, recipient)
             
         time.sleep(random.randrange(4,5))
         self.toLower(UnavailablePresenceProtocolEntity())
